@@ -7,10 +7,9 @@ const TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-// This stores leads from your landing page
 const leads = {};
+const pendingLeads = [];
 
-// Webhook verification
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
@@ -22,7 +21,6 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// Receive messages
 app.post('/webhook', async (req, res) => {
   try {
     const body = req.body;
@@ -30,95 +28,78 @@ app.post('/webhook', async (req, res) => {
       const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
       if (message && message.type === 'text') {
         const from = message.from;
-        const text = message.text.body;
+        const text = message.text.body.trim();
         const lower = text.toLowerCase();
 
-        // Check if message contains a REF code from landing page
-        if (text.includes('REF#')) {
-          const ref = text.split('REF#')[1].trim().split(' ')[0];
-          const lead = leads[ref];
+        if (!leads[from] && pendingLeads.length > 0) {
+          leads[from] = pendingLeads.shift();
+        }
 
-          if (lead) {
-            // Save lead under their phone number for future messages
-            leads[from] = lead;
-            await sendMessage(from,
-`Hi ${lead.name}! 👋
+        const lead = leads[from];
+        const name = lead ? lead.name : 'there';
 
-Welcome to Dioverse. You just saw exactly how our WhatsApp bot works.
-
-That greeting you just received? Your customers will get the same experience.
-
-Here is what we set up for your business:
-✅ Auto replies when customers message you
-✅ Greets every customer by their name
-✅ Answers common questions automatically
-✅ Saves every customer contact for you
-
-Reply with *PRICE* to see our packages
-Reply with *HOW* to see how it works`
-            );
-          } else {
-            await sendDefaultMessage(from);
-          }
-
-        } else if (lower.includes('price') || lower.includes('how much') || lower.includes('cost')) {
-          const lead = leads[from];
-          const name = lead ? lead.name : 'there';
+        if (lower.includes('interested') || lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
           await sendMessage(from,
-`Here are our packages ${name} 💰
+`Hi ${name}!
 
-*Starter Package*
-Setup your WhatsApp bot
-Personalized replies
-Works on your website
-One time payment of ₦75,000
+You just experienced something most businesses in Nigeria are not using yet.
 
-*Growth Package*
-Everything in Starter
-Monthly updates and changes
-Priority support
-₦75,000 setup + ₦35,000 per month
+That greeting with your name the moment you messaged? That is exactly what your customers will feel every single time they reach out to your business. Instant. Personal. Professional.
 
-*Best Deal*
-Get both for ₦95,000 in your first month
+No delays. No "I will get back to you." Just instant replies that make your business look on top of its game 24 hours a day.
 
-Reply *YES* to get started today 🚀`
+Reply with:
+1 to see how it works
+2 to see pricing
+3 to get started`
           );
 
-        } else if (lower.includes('how') || lower.includes('work')) {
+        } else if (text === '1' || lower.includes('how') || lower.includes('work')) {
           await sendMessage(from,
-`Here is how it works 👇
+`Right now, every time a customer messages your business on WhatsApp, they have to wait for you to be available. You could be in a meeting, on the road or simply asleep. This means they have to wait and not everyone likes to wait, so you lose customers.
 
-1. Your customer sees your business online
-2. They click your WhatsApp button
-3. They type their name and enter their email
-4. WhatsApp opens and they send a message
-5. Your bot replies instantly and greets them by name
-6. They get all the information they need automatically
+With Dioverse, the moment a customer messages you, they get an instant reply. Your WhatsApp greets them by their name, tells them everything about your business and even answers their common questions automatically.
 
-You do not have to be online at all.
-Your WhatsApp works for you 24 hours a day.
+The best part? You are not doing any of this. It is all running on its own while you focus on what matters.
 
-Reply *PRICE* to see our packages 💰`
+Reply 2 to see what it costs`
           );
 
-        } else if (lower.includes('yes') || lower.includes('interested') || lower.includes('start')) {
-          const lead = leads[from];
-          const name = lead ? lead.name : 'there';
+        } else if (text === '2' || lower.includes('price') || lower.includes('cost') || lower.includes('how much')) {
           await sendMessage(from,
-`Amazing ${name}! 🎉
+`Here is the honest breakdown ${name}
 
-We will reach out to you shortly to get everything set up.
+To get your WhatsApp bot set up properly, there is a one time setup fee of ₦75,000. That covers everything. We build it, connect it to your WhatsApp, add it to your website and make sure it is working perfectly before we hand it over to you.
 
-In the meantime please save our contact so you do not lose us 💾
+After that, to keep it running, updated and supported every month, it is ₦35,000 per month. That includes any changes you want, priority support and we make sure nothing ever goes wrong.
 
-We will have your bot running within 24 hours of payment. 
+No hidden fees. No surprises.
 
-Talk soon! 👊`
+Reply 3 when you are ready to get started`
+          );
+
+        } else if (text === '3' || lower.includes('yes') || lower.includes('start') || lower.includes('ready')) {
+          await sendMessage(from,
+`Let's go ${name}!
+
+We will reach out to you shortly to get the ball rolling.
+
+Please save our contact so you do not lose us 💾
+
+Your bot will be live and running within 24 hours of payment. Talk soon!`
           );
 
         } else {
-          await sendDefaultMessage(from);
+          await sendMessage(from,
+`Hey ${name}
+
+Not sure what you mean but we are here.
+
+Reply with:
+1 to see how it works
+2 to see pricing
+3 to get started`
+          );
         }
       }
       res.sendStatus(200);
@@ -129,25 +110,11 @@ Talk soon! 👊`
   }
 });
 
-async function sendDefaultMessage(from) {
-  await sendMessage(from,
-`Hi there! 👋
-
-Welcome to Dioverse. We set up WhatsApp bots for businesses.
-
-Reply with:
-*HOW* to see how it works
-*PRICE* to see our packages
-*YES* if you are ready to get started`
-  );
-}
-
-// Save lead from landing page form
 app.post('/save-lead', async (req, res) => {
   try {
-    const { name, email, ref } = req.body;
-    leads[ref] = { name, email, timestamp: new Date() };
-    console.log(`Lead saved: ${name} | ${email} | REF#${ref}`);
+    const { name, email } = req.body;
+    pendingLeads.push({ name, email, timestamp: new Date() });
+    console.log(`Lead saved: ${name} | ${email}`);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false });
@@ -163,9 +130,7 @@ async function sendMessage(to, text) {
         to,
         text: { body: text }
       },
-      {
-        headers: { Authorization: `Bearer ${TOKEN}` }
-      }
+      { headers: { Authorization: `Bearer ${TOKEN}` } }
     );
   } catch (err) {
     console.error('Send error:', err.response?.data || err.message);
@@ -174,3 +139,4 @@ async function sendMessage(to, text) {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
+  
