@@ -533,8 +533,7 @@
     } catch (e) {}
 
     // Now open WhatsApp - name is already in MongoDB
-    const phone = '2347074315797';
-    const message = `Hi, I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
+    const phone = '2347074315797';const message = `Hi, my name is ${name}. I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   }
 </script>
