@@ -108,11 +108,9 @@
     font-family: 'Syne', -apple-system, sans-serif;
     font-size: 1.75rem;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.1;
     letter-spacing: -0.5px;
     margin-bottom: 20px;
-    word-break: normal;
-    overflow-wrap: break-word;
   }
 
   h1 em {
@@ -373,7 +371,7 @@
 
   <section class="hero">
     <div class="tag">Limited spots available</div>
-    <h1>Let <em>WhatsApp</em> reply your customers</h1>
+    <h1>Let <em>WhatsApp</em> reply your customers for you</h1>
     <p class="subtitle">Fill in your name and email below. We will reach out to you on WhatsApp right away and show you exactly how it works.</p>
 
     <div class="proof">
@@ -516,7 +514,8 @@
   async function openWhatsApp() {
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
-    
+
+    // Save to server + MongoDB
     try {
       await fetch('https://dioverse-whatsapp-bot.onrender.com/save-lead', {
         method: 'POST',
@@ -524,6 +523,17 @@
         body: JSON.stringify({ name, email })
       });
     } catch (e) {}
+
+    // Save directly to Google Sheets
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ name, email })
+      });
+    } catch (e) {}
+
     const phone = '2347074315797';
     const message = `Hi, I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -531,4 +541,5 @@
 </script>
 
 </body>
-</html>
+  </html>
+  
