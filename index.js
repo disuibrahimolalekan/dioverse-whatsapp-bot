@@ -12,7 +12,6 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec';
 
 let db;
-const pendingLeads = {};
 
 async function connectDB() {
   try {
@@ -77,19 +76,29 @@ async function sendMessage(client, to, text) {
 
 async function saveToSheets(name, email) {
   try {
-    const response = await axios({
+    await axios({
       method: 'post',
       url: SHEETS_URL,
       data: JSON.stringify({ name, email }),
-      headers: {
-        'Content-Type': 'text/plain'
-      },
+      headers: { 'Content-Type': 'text/plain' },
       maxRedirects: 5
     });
-    console.log('Sheets response:', response.data);
   } catch (err) {
     console.log('Sheets save failed:', err.message);
   }
+}
+
+// Get name from pending leads in MongoDB
+async function getNameFromPendingLeads(clientId) {
+  try {
+    const lead = await db.collection('leads').findOneAndUpdate(
+      { clientId, matched: { $ne: true } },
+      { $set: { matched: true } },
+      { sort: { timestamp: 1 } }
+    );
+    if (lead && lead.name) return lead.name;
+  } catch (e) {}
+  return null;
 }
 
 // Webhook verification
@@ -121,17 +130,18 @@ app.post('/webhook', async (req, res) => {
         const client = getClientByPhoneId(phoneNumberId);
         if (!client) return res.sendStatus(200);
 
+        // Get name — check existing conversation first, then pending leads
         let name = 'there';
         try {
           const existing = await db.collection('conversations').findOne({ clientId: client.id, phone: from });
-          if (existing && existing.name && existing.name !== 'Unknown') {
+          if (existing && existing.name && existing.name !== 'Unknown' && existing.name !== 'there') {
             name = existing.name;
           }
         } catch (e) {}
 
-        if (name === 'there' && pendingLeads[client.id]?.length > 0) {
-          const lead = pendingLeads[client.id].shift();
-          name = lead.name;
+        if (name === 'there') {
+          const leadName = await getNameFromPendingLeads(client.id);
+          if (leadName) name = leadName;
         }
 
         await saveMessage(client.id, from, name, 'customer', text);
@@ -139,7 +149,7 @@ app.post('/webhook', async (req, res) => {
         let reply = '';
         const r = client.replies;
 
-        if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('interested') || lower.includes('know more') || lower.includes('tell me')) {
+        if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('interested') || lower.includes('know more') || lower.includes('tell me') || lower.includes('more')) {
           reply = r.welcome(name);
         } else if (text === '1' || lower.includes('how') || lower.includes('work')) {
           reply = r.howItWorks(name);
@@ -167,10 +177,14 @@ app.post('/save-lead', async (req, res) => {
   try {
     const { name, email, clientId = 'dioverse' } = req.body;
 
-    if (!pendingLeads[clientId]) pendingLeads[clientId] = [];
-    pendingLeads[clientId].push({ name, email, timestamp: new Date() });
+    await db.collection('leads').insertOne({
+      clientId,
+      name,
+      email,
+      matched: false,
+      timestamp: new Date()
+    });
 
-    await db.collection('leads').insertOne({ clientId, name, email, timestamp: new Date() });
     console.log(`Lead saved [${clientId}]: ${name} | ${email}`);
 
     await saveToSheets(name, email);
