@@ -144,11 +144,13 @@ app.post('/webhook', async (req, res) => {
           if (leadName) name = leadName;
         }
 
-        // Extract name from message
-if (lower.includes('my name is')) {
-  const match = text.match(/my name is ([a-zA-Z]+)/i);
-  if (match) name = match[1];
-}
+        // Extract name directly from message text "my name is X"
+        if (lower.includes('my name is')) {
+          const match = text.match(/my name is ([a-zA-Z]+)/i);
+          if (match) name = match[1];
+        }
+
+        await saveMessage(client.id, from, name, 'customer', text);
 
         let reply = '';
         const r = client.replies;
@@ -256,4 +258,4 @@ app.post('/inbox/reply', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
-  
+
