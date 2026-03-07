@@ -154,20 +154,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 // Save lead from landing page
-app.post('/save-lead', async (req, res) => {
-  try {
-    const { name, email, clientId = 'dioverse' } = req.body;
-    if (!pendingLeads[clientId]) pendingLeads[clientId] = [];
-    pendingLeads[clientId].push({ name, email, timestamp: new Date() });
-    await db.collection('leads').insertOne({ clientId, name, email, timestamp: new Date() });
-    console.log(`Lead saved [${clientId}]: ${name} | ${email}`);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
-});
-
-// ─── INBOX API ───────────────────────────────────────────
+── INBOX API ───────────────────────────────────────────
 
 // Login — client provides their password
 app.post('/inbox/login', (req, res) => {
@@ -176,7 +163,26 @@ app.post('/inbox/login', (req, res) => {
   if (client) {
     res.json({ success: true, clientId: client.id, clientName: client.name });
   } else {
-    res.status(401).json({ success: false, message: 'Wrong password' });
+    res.status(401).json({ success: false, message: 'Wrong password' }app.post('/save-lead', async (req, res) => {
+  try {
+    const { name, email, clientId = 'dioverse' } = req.body;
+    if (!pendingLeads[clientId]) pendingLeads[clientId] = [];
+    pendingLeads[clientId].push({ name, email, timestamp: new Date() });
+    await db.collection('leads').insertOne({ clientId, name, email, timestamp: new Date() });
+    console.log(`Lead saved [${clientId}]: ${name} | ${email}`);
+
+    // Save to Google Sheets
+    try {
+      await axios.post('https://script.google.com/macros/s/AKfycbwS0iAcnMJbUVvZsdqi2LytS0Y4sjeVZFLwEvOBMYbfIjdU8m7GojbpnhbBaNjmokbgkQ/exec', {
+        name, email
+      });
+    } catch (sheetErr) {
+      console.log('Sheets save failed:', sheetErr.message);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 });
 
