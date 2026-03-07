@@ -1,19 +1,17 @@
 const express = require('express');
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
+const clients = require('./clients');
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-const INBOX_PASSWORD = process.env.INBOX_PASSWORD || 'dioverse2024';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 let db;
-const pendingLeads = [];
+const pendingLeads = {}; // per client: { clientId: [leads] }
 
 // Connect to MongoDB
 async function connectDB() {
@@ -29,24 +27,31 @@ async function connectDB() {
 
 connectDB();
 
+// Find client by phone number ID
+function getClientByPhoneId(phoneNumberId) {
+  return clients.find(c => c.phoneNumberId === phoneNumberId);
+}
+
+// Find client by ID
+function getClientById(id) {
+  return clients.find(c => c.id === id);
+}
+
 // Save message to MongoDB
-async function saveMessage(phone, name, sender, text) {
+async function saveMessage(clientId, phone, name, sender, text) {
   try {
     await db.collection('conversations').updateOne(
-      { phone },
+      { clientId, phone },
       {
         $set: {
+          clientId,
           phone,
           name: name || 'Unknown',
           lastMessage: text.substring(0, 60),
           lastTime: new Date(),
         },
         $push: {
-          messages: {
-            sender,
-            text,
-            time: new Date()
-          }
+          messages: { sender, text, time: new Date() }
         },
         $inc: { unread: sender === 'customer' ? 1 : 0 }
       },
@@ -54,6 +59,23 @@ async function saveMessage(phone, name, sender, text) {
     );
   } catch (err) {
     console.error('Save message error:', err.message);
+  }
+}
+
+// Send WhatsApp message
+async function sendMessage(client, to, text) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v18.0/${client.phoneNumberId}/messages`,
+      {
+        messaging_product: 'whatsapp',
+        to,
+        text: { body: text }
+      },
+      { headers: { Authorization: `Bearer ${client.token}` } }
+    );
+  } catch (err) {
+    console.error('Send error:', err.response?.data || err.message);
   }
 }
 
@@ -74,94 +96,54 @@ app.post('/webhook', async (req, res) => {
   try {
     const body = req.body;
     if (body.object === 'whatsapp_business_account') {
-      const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+      const value = body.entry?.[0]?.changes?.[0]?.value;
+      const message = value?.messages?.[0];
+      const phoneNumberId = value?.metadata?.phone_number_id;
+
       if (message && message.type === 'text') {
         const from = message.from;
         const text = message.text.body.trim();
         const lower = text.toLowerCase();
 
-        // Check if we know this person in DB
-        let lead = null;
+        // Find which client this message belongs to
+        const client = getClientByPhoneId(phoneNumberId);
+        if (!client) return res.sendStatus(200);
+
+        // Get lead name
+        let name = 'there';
         try {
-          const existing = await db.collection('conversations').findOne({ phone: from });
+          const existing = await db.collection('conversations').findOne({ clientId: client.id, phone: from });
           if (existing && existing.name && existing.name !== 'Unknown') {
-            lead = { name: existing.name };
+            name = existing.name;
           }
         } catch (e) {}
 
-        // Match pending lead if not found in DB
-        if (!lead && pendingLeads.length > 0) {
-          lead = pendingLeads.shift();
+        if (name === 'there' && pendingLeads[client.id]?.length > 0) {
+          const lead = pendingLeads[client.id].shift();
+          name = lead.name;
         }
-
-        const name = lead ? lead.name : 'there';
 
         // Save incoming message
-        await saveMessage(from, name, 'customer', text);
+        await saveMessage(client.id, from, name, 'customer', text);
 
+        // Bot reply logic
         let reply = '';
+        const r = client.replies;
 
-        if (lower.includes('interested') || lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || lower.includes('know more') || lower.includes('tell me')) {
-          reply =
-`Hi ${name}!
-
-You just experienced something most businesses in Nigeria are not using yet.
-
-That greeting with your name the moment you messaged? That is exactly what your customers will feel every single time they reach out to your business. Instant. Personal. Professional.
-
-No delays. No "I will get back to you." Just instant replies that make your business look on top of its game 24 hours a day.
-
-Reply with:
-1 to see how it works
-2 to see pricing
-3 to get started`;
-
+        if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey') || lower.includes('interested') || lower.includes('know more') || lower.includes('tell me')) {
+          reply = r.welcome(name);
         } else if (text === '1' || lower.includes('how') || lower.includes('work')) {
-          reply =
-`Right now, every time a customer messages your business on WhatsApp, they have to wait for you to be available. You could be in a meeting, on the road or simply asleep. This means they have to wait and not everyone likes to wait, so you lose customers.
-
-With Dioverse, the moment a customer messages you, they get an instant reply. Your WhatsApp greets them by their name, tells them everything about your business and even answers their common questions automatically.
-
-The best part? You are not doing any of this. It is all running on its own while you focus on what matters.
-
-Reply 2 to see what it costs`;
-
+          reply = r.howItWorks(name);
         } else if (text === '2' || lower.includes('price') || lower.includes('cost') || lower.includes('how much')) {
-          reply =
-`Here is the honest breakdown ${name}
-
-To get your WhatsApp bot set up properly, there is a one time setup fee of ₦75,000. That covers everything. We build it, connect it to your WhatsApp, add it to your website and make sure it is working perfectly before we hand it over to you.
-
-After that, to keep it running, updated and supported every month, it is ₦35,000 per month. That includes any changes you want, priority support and we make sure nothing ever goes wrong.
-
-No hidden fees. No surprises.
-
-Reply 3 when you are ready to get started`;
-
+          reply = r.pricing(name);
         } else if (text === '3' || lower.includes('yes') || lower.includes('start') || lower.includes('ready')) {
-          reply =
-`Let's go ${name}!
-
-We will reach out to you shortly to get the ball rolling.
-
-Please save our contact so you do not lose us 💾
-
-Your bot will be live and running within 24 hours of payment. Talk soon!`;
-
+          reply = r.getStarted(name);
         } else {
-          reply =
-`Hey ${name}
-
-Not sure what you mean but we are here.
-
-Reply with:
-1 to see how it works
-2 to see pricing
-3 to get started`;
+          reply = r.default(name);
         }
 
-        await sendMessage(from, reply);
-        await saveMessage(from, name, 'bot', reply);
+        await sendMessage(client, from, reply);
+        await saveMessage(client.id, from, name, 'bot', reply);
       }
       res.sendStatus(200);
     }
@@ -174,11 +156,11 @@ Reply with:
 // Save lead from landing page
 app.post('/save-lead', async (req, res) => {
   try {
-    const { name, email } = req.body;
-    pendingLeads.push({ name, email, timestamp: new Date() });
-    // Also save to DB
-    await db.collection('leads').insertOne({ name, email, timestamp: new Date() });
-    console.log(`Lead saved: ${name} | ${email}`);
+    const { name, email, clientId = 'dioverse' } = req.body;
+    if (!pendingLeads[clientId]) pendingLeads[clientId] = [];
+    pendingLeads[clientId].push({ name, email, timestamp: new Date() });
+    await db.collection('leads').insertOne({ clientId, name, email, timestamp: new Date() });
+    console.log(`Lead saved [${clientId}]: ${name} | ${email}`);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false });
@@ -187,19 +169,22 @@ app.post('/save-lead', async (req, res) => {
 
 // ─── INBOX API ───────────────────────────────────────────
 
+// Login — client provides their password
 app.post('/inbox/login', (req, res) => {
   const { password } = req.body;
-  if (password === INBOX_PASSWORD) {
-    res.json({ success: true });
+  const client = clients.find(c => c.inboxPassword === password);
+  if (client) {
+    res.json({ success: true, clientId: client.id, clientName: client.name });
   } else {
     res.status(401).json({ success: false, message: 'Wrong password' });
   }
 });
 
-app.get('/inbox/conversations', async (req, res) => {
+// Get conversations for a specific client
+app.get('/inbox/conversations/:clientId', async (req, res) => {
   try {
     const list = await db.collection('conversations')
-      .find({})
+      .find({ clientId: req.params.clientId })
       .sort({ lastTime: -1 })
       .project({ phone: 1, name: 1, lastMessage: 1, lastTime: 1, unread: 1 })
       .toArray();
@@ -209,46 +194,37 @@ app.get('/inbox/conversations', async (req, res) => {
   }
 });
 
-app.get('/inbox/conversation/:phone', async (req, res) => {
+// Get single conversation
+app.get('/inbox/conversation/:clientId/:phone', async (req, res) => {
   try {
-    const convo = await db.collection('conversations').findOne({ phone: req.params.phone });
+    const convo = await db.collection('conversations').findOne({
+      clientId: req.params.clientId,
+      phone: req.params.phone
+    });
     if (!convo) return res.json({ messages: [] });
-    await db.collection('conversations').updateOne({ phone: req.params.phone }, { $set: { unread: 0 } });
+    await db.collection('conversations').updateOne(
+      { clientId: req.params.clientId, phone: req.params.phone },
+      { $set: { unread: 0 } }
+    );
     res.json(convo);
   } catch (err) {
     res.json({ messages: [] });
   }
 });
 
+// Send manual reply
 app.post('/inbox/reply', async (req, res) => {
   try {
-    const { phone, message } = req.body;
-    await sendMessage(phone, message);
-    await saveMessage(phone, null, 'agent', message);
+    const { clientId, phone, message } = req.body;
+    const client = getClientById(clientId);
+    if (!client) return res.status(404).json({ success: false });
+    await sendMessage(client, phone, message);
+    await saveMessage(clientId, phone, null, 'agent', message);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false });
   }
 });
 
-// ─── SEND MESSAGE ────────────────────────────────────────
-
-async function sendMessage(to, text) {
-  try {
-    await axios.post(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        messaging_product: 'whatsapp',
-        to,
-        text: { body: text }
-      },
-      { headers: { Authorization: `Bearer ${TOKEN}` } }
-    );
-  } catch (err) {
-    console.error('Send error:', err.response?.data || err.message);
-  }
-}
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
-      
+app.listen(PORT, () => console.log(`Dioverse multi-client bot running on port ${PORT}`));
