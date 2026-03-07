@@ -515,7 +515,15 @@
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
 
-    // Save to server + MongoDB
+    // Save to Google Sheets in background (no waiting)
+    fetch('https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ name, email })
+    }).catch(() => {});
+
+    // Save to MongoDB FIRST then open WhatsApp
     try {
       await fetch('https://dioverse-whatsapp-bot.onrender.com/save-lead', {
         method: 'POST',
@@ -524,16 +532,7 @@
       });
     } catch (e) {}
 
-    // Save directly to Google Sheets
-    try {
-      await fetch('https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ name, email })
-      });
-    } catch (e) {}
-
+    // Now open WhatsApp - name is already in MongoDB
     const phone = '2347074315797';
     const message = `Hi, I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
