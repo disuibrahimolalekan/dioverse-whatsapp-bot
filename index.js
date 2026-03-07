@@ -9,11 +9,11 @@ app.use(express.static('public'));
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI;
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwS0iAcnMJbUVvZsdqi2LytS0Y4sjeVZFLwEvOBMYbfIjdU8m7GojbpnhbBaNjmokbgkQ/exec';
 
 let db;
-const pendingLeads = {}; // per client: { clientId: [leads] }
+const pendingLeads = {};
 
-// Connect to MongoDB
 async function connectDB() {
   try {
     const client = new MongoClient(MONGODB_URI);
@@ -27,17 +27,14 @@ async function connectDB() {
 
 connectDB();
 
-// Find client by phone number ID
 function getClientByPhoneId(phoneNumberId) {
   return clients.find(c => c.phoneNumberId === phoneNumberId);
 }
 
-// Find client by ID
 function getClientById(id) {
   return clients.find(c => c.id === id);
 }
 
-// Save message to MongoDB
 async function saveMessage(clientId, phone, name, sender, text) {
   try {
     await db.collection('conversations').updateOne(
@@ -62,7 +59,6 @@ async function saveMessage(clientId, phone, name, sender, text) {
   }
 }
 
-// Send WhatsApp message
 async function sendMessage(client, to, text) {
   try {
     await axios.post(
@@ -105,11 +101,9 @@ app.post('/webhook', async (req, res) => {
         const text = message.text.body.trim();
         const lower = text.toLowerCase();
 
-        // Find which client this message belongs to
         const client = getClientByPhoneId(phoneNumberId);
         if (!client) return res.sendStatus(200);
 
-        // Get lead name
         let name = 'there';
         try {
           const existing = await db.collection('conversations').findOne({ clientId: client.id, phone: from });
@@ -123,10 +117,8 @@ app.post('/webhook', async (req, res) => {
           name = lead.name;
         }
 
-        // Save incoming message
         await saveMessage(client.id, from, name, 'customer', text);
 
-        // Bot reply logic
         let reply = '';
         const r = client.replies;
 
@@ -154,28 +146,19 @@ app.post('/webhook', async (req, res) => {
 });
 
 // Save lead from landing page
-── INBOX API ───────────────────────────────────────────
-
-// Login — client provides their password
-app.post('/inbox/login', (req, res) => {
-  const { password } = req.body;
-  const client = clients.find(c => c.inboxPassword === password);
-  if (client) {
-    res.json({ success: true, clientId: client.id, clientName: client.name });
-  } else {
-    res.status(401).json({ success: false, message: 'Wrong password' }app.post('/save-lead', async (req, res) => {
+app.post('/save-lead', async (req, res) => {
   try {
     const { name, email, clientId = 'dioverse' } = req.body;
+
     if (!pendingLeads[clientId]) pendingLeads[clientId] = [];
     pendingLeads[clientId].push({ name, email, timestamp: new Date() });
+
     await db.collection('leads').insertOne({ clientId, name, email, timestamp: new Date() });
     console.log(`Lead saved [${clientId}]: ${name} | ${email}`);
 
     // Save to Google Sheets
     try {
-      await axios.post('https://script.google.com/macros/s/AKfycbwS0iAcnMJbUVvZsdqi2LytS0Y4sjeVZFLwEvOBMYbfIjdU8m7GojbpnhbBaNjmokbgkQ/exec', {
-        name, email
-      });
+      await axios.post(SHEETS_URL, { name, email });
     } catch (sheetErr) {
       console.log('Sheets save failed:', sheetErr.message);
     }
@@ -186,7 +169,18 @@ app.post('/inbox/login', (req, res) => {
   }
 });
 
-// Get conversations for a specific client
+// ─── INBOX API ───────────────────────────────────────────
+
+app.post('/inbox/login', (req, res) => {
+  const { password } = req.body;
+  const client = clients.find(c => c.inboxPassword === password);
+  if (client) {
+    res.json({ success: true, clientId: client.id, clientName: client.name });
+  } else {
+    res.status(401).json({ success: false, message: 'Wrong password' });
+  }
+});
+
 app.get('/inbox/conversations/:clientId', async (req, res) => {
   try {
     const list = await db.collection('conversations')
@@ -200,7 +194,6 @@ app.get('/inbox/conversations/:clientId', async (req, res) => {
   }
 });
 
-// Get single conversation
 app.get('/inbox/conversation/:clientId/:phone', async (req, res) => {
   try {
     const convo = await db.collection('conversations').findOne({
@@ -218,7 +211,6 @@ app.get('/inbox/conversation/:clientId/:phone', async (req, res) => {
   }
 });
 
-// Send manual reply
 app.post('/inbox/reply', async (req, res) => {
   try {
     const { clientId, phone, message } = req.body;
@@ -233,4 +225,5 @@ app.post('/inbox/reply', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Dioverse multi-client bot running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
+  
