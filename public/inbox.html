@@ -79,7 +79,7 @@
   .login-error { color: #ff6b6b; font-size: 0.78rem; margin-top: 10px; display: none; }
 
   /* APP LAYOUT */
-  #app { display: none; height: 100vh; flex-direction: column; }
+  #app { display: none; height: 100vh; height: 100dvh; flex-direction: column; }
 
   .header {
     display: flex;
@@ -103,7 +103,7 @@
     border: 1px solid rgba(37,211,102,0.2);
   }
 
-  .main { display: flex; flex: 1; overflow: hidden; }
+  .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 
   /* CONVERSATION LIST */
   .conv-list {
@@ -167,6 +167,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
     background: #0d0d0d;
   }
   .chat-empty {
@@ -203,8 +204,9 @@
   /* MESSAGES - WhatsApp style */
   .chat-messages {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
-    padding: 16px 12px;
+    padding: 16px 12px 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -238,19 +240,20 @@
 
   /* Bot - right, green tint */
   .msg-row.right.bot .msg-bubble {
-    background: #0d2e1a;
-    border: 1px solid rgba(37,211,102,0.15);
+    background: #0e3320;
+    border: none;
     border-top-right-radius: 3px;
-    color: #d4f7e2;
+    color: #c8f5da;
   }
 
   /* Agent - right, solid green */
   .msg-row.right.agent .msg-bubble {
-    background: #1a4a2a;
-    border: 1px solid rgba(37,211,102,0.3);
+    background: var(--green);
+    border: none;
     border-top-right-radius: 3px;
-    color: #e8fdf0;
+    color: #000;
   }
+  .msg-row.right.agent .msg-time { color: rgba(0,0,0,0.45); }
 
   .msg-time {
     font-size: 0.62rem;
@@ -275,30 +278,31 @@
     display: flex;
     align-items: flex-end;
     gap: 10px;
-    padding: 12px 14px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background: #111;
+    border-top: 1px solid rgba(255,255,255,0.06);
     flex-shrink: 0;
-    min-height: 68px;
+    position: relative;
+    z-index: 10;
   }
   .reply-input {
     flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: #222;
+    border: 1.5px solid rgba(255,255,255,0.1);
     border-radius: 24px;
-    padding: 11px 16px;
+    padding: 12px 18px;
     color: var(--off-white);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     outline: none;
     resize: none;
     max-height: 120px;
     line-height: 1.5;
     transition: border-color 0.2s;
   }
-  .reply-input:focus { border-color: rgba(37,211,102,0.35); }
-  .reply-input::placeholder { color: var(--gray); }
+  .reply-input:focus { border-color: rgba(37,211,102,0.5); }
+  .reply-input::placeholder { color: #555; }
   .send-btn {
     width: 44px; height: 44px;
     border-radius: 50%;
@@ -317,7 +321,7 @@
     .conv-list { max-width: 100%; border-right: none; }
     .chat-panel { display: none; }
     .conv-list.hidden { display: none; }
-    .chat-panel.visible { display: flex; width: 100%; }
+    .chat-panel.visible { display: flex; width: 100%; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; flex-direction: column; }
     .back-btn { display: flex !important; }
   }
 
@@ -379,7 +383,7 @@
         <div>Select a conversation</div>
       </div>
 
-      <div id="chatContent" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+      <div id="chatContent" style="display:none; flex-direction:column; flex:1; min-height:0; overflow:hidden;">
         <div class="chat-header">
           <button class="back-btn" onclick="showList()">
             <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>Back
