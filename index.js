@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
-const path = require('path');
+const { MongoClient } = require('mongodb');
+
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
@@ -9,32 +10,51 @@ const TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const INBOX_PASSWORD = process.env.INBOX_PASSWORD || 'dioverse2024';
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// Store all conversations in memory
-const conversations = {};
-const leads = {};
+let db;
 const pendingLeads = [];
 
-// Helper to add message to conversation
-function saveMessage(phone, sender, text) {
-  if (!conversations[phone]) {
-    conversations[phone] = {
-      phone,
-      name: 'Unknown',
-      messages: [],
-      lastMessage: '',
-      lastTime: new Date(),
-      unread: 0
-    };
+// Connect to MongoDB
+async function connectDB() {
+  try {
+    const client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    db = client.db('dioverse');
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
   }
-  conversations[phone].messages.push({
-    sender, // 'customer' or 'bot' or 'agent'
-    text,
-    time: new Date()
-  });
-  conversations[phone].lastMessage = text.substring(0, 60);
-  conversations[phone].lastTime = new Date();
-  if (sender === 'customer') conversations[phone].unread++;
+}
+
+connectDB();
+
+// Save message to MongoDB
+async function saveMessage(phone, name, sender, text) {
+  try {
+    await db.collection('conversations').updateOne(
+      { phone },
+      {
+        $set: {
+          phone,
+          name: name || 'Unknown',
+          lastMessage: text.substring(0, 60),
+          lastTime: new Date(),
+        },
+        $push: {
+          messages: {
+            sender,
+            text,
+            time: new Date()
+          }
+        },
+        $inc: { unread: sender === 'customer' ? 1 : 0 }
+      },
+      { upsert: true }
+    );
+  } catch (err) {
+    console.error('Save message error:', err.message);
+  }
 }
 
 // Webhook verification
@@ -60,26 +80,28 @@ app.post('/webhook', async (req, res) => {
         const text = message.text.body.trim();
         const lower = text.toLowerCase();
 
-        // Match pending lead to phone number
-        if (!leads[from] && pendingLeads.length > 0) {
-          leads[from] = pendingLeads.shift();
+        // Check if we know this person in DB
+        let lead = null;
+        try {
+          const existing = await db.collection('conversations').findOne({ phone: from });
+          if (existing && existing.name && existing.name !== 'Unknown') {
+            lead = { name: existing.name };
+          }
+        } catch (e) {}
+
+        // Match pending lead if not found in DB
+        if (!lead && pendingLeads.length > 0) {
+          lead = pendingLeads.shift();
         }
 
-        const lead = leads[from];
         const name = lead ? lead.name : 'there';
 
-        // Update conversation name if we know it
-        if (lead && conversations[from]) {
-          conversations[from].name = lead.name;
-        }
-
         // Save incoming message
-        saveMessage(from, 'customer', text);
-        if (lead) conversations[from].name = lead.name;
+        await saveMessage(from, name, 'customer', text);
 
         let reply = '';
 
-        if (lower.includes('interested') || lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+        if (lower.includes('interested') || lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || lower.includes('know more') || lower.includes('tell me')) {
           reply =
 `Hi ${name}!
 
@@ -139,7 +161,7 @@ Reply with:
         }
 
         await sendMessage(from, reply);
-        saveMessage(from, 'bot', reply);
+        await saveMessage(from, name, 'bot', reply);
       }
       res.sendStatus(200);
     }
@@ -154,6 +176,8 @@ app.post('/save-lead', async (req, res) => {
   try {
     const { name, email } = req.body;
     pendingLeads.push({ name, email, timestamp: new Date() });
+    // Also save to DB
+    await db.collection('leads').insertOne({ name, email, timestamp: new Date() });
     console.log(`Lead saved: ${name} | ${email}`);
     res.json({ success: true });
   } catch (err) {
@@ -163,7 +187,6 @@ app.post('/save-lead', async (req, res) => {
 
 // ─── INBOX API ───────────────────────────────────────────
 
-// Login
 app.post('/inbox/login', (req, res) => {
   const { password } = req.body;
   if (password === INBOX_PASSWORD) {
@@ -173,34 +196,35 @@ app.post('/inbox/login', (req, res) => {
   }
 });
 
-// Get all conversations
-app.get('/inbox/conversations', (req, res) => {
-  const list = Object.values(conversations)
-    .sort((a, b) => new Date(b.lastTime) - new Date(a.lastTime))
-    .map(c => ({
-      phone: c.phone,
-      name: c.name,
-      lastMessage: c.lastMessage,
-      lastTime: c.lastTime,
-      unread: c.unread
-    }));
-  res.json(list);
+app.get('/inbox/conversations', async (req, res) => {
+  try {
+    const list = await db.collection('conversations')
+      .find({})
+      .sort({ lastTime: -1 })
+      .project({ phone: 1, name: 1, lastMessage: 1, lastTime: 1, unread: 1 })
+      .toArray();
+    res.json(list);
+  } catch (err) {
+    res.json([]);
+  }
 });
 
-// Get single conversation messages
-app.get('/inbox/conversation/:phone', (req, res) => {
-  const convo = conversations[req.params.phone];
-  if (!convo) return res.json({ messages: [] });
-  conversations[req.params.phone].unread = 0;
-  res.json(convo);
+app.get('/inbox/conversation/:phone', async (req, res) => {
+  try {
+    const convo = await db.collection('conversations').findOne({ phone: req.params.phone });
+    if (!convo) return res.json({ messages: [] });
+    await db.collection('conversations').updateOne({ phone: req.params.phone }, { $set: { unread: 0 } });
+    res.json(convo);
+  } catch (err) {
+    res.json({ messages: [] });
+  }
 });
 
-// Send manual reply from inbox
 app.post('/inbox/reply', async (req, res) => {
   try {
     const { phone, message } = req.body;
     await sendMessage(phone, message);
-    saveMessage(phone, 'agent', message);
+    await saveMessage(phone, null, 'agent', message);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false });
@@ -227,3 +251,4 @@ async function sendMessage(to, text) {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
+      
