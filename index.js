@@ -144,7 +144,11 @@ app.post('/webhook', async (req, res) => {
           if (leadName) name = leadName;
         }
 
-        await saveMessage(client.id, from, name, 'customer', text);
+        // Extract name from message
+if (lower.includes('my name is')) {
+  const match = text.match(/my name is ([a-zA-Z]+)/i);
+  if (match) name = match[1];
+}
 
         let reply = '';
         const r = client.replies;
