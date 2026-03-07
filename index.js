@@ -10,6 +10,7 @@ app.use(express.static('public'));
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI;
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzWBvCN5yTlW0VlAvnskunnmoargP7iLS4fnDVgyKt2trIPN-0P8dAtZcUZJlDNvftxMg/exec';
+
 let db;
 const pendingLeads = {};
 
