@@ -219,21 +219,7 @@ app.post('/webhook', async (req, res) => {
           reply = r.howItWorks(name);
         } else if (text === '2' || lower.includes('price') || lower.includes('cost') || lower.includes('how much')) {
           reply = r.pricing(name);
-        } else if (text === '3' || lower.includes('pay') || lower.includes('purchase') || lower.includes('buy') || lower.includes('ready') || lower.includes('start')) {
-          reply = `Great choice ${name}! Here is your payment link to get started:
-
-${PAYSTACK_PAYMENT_LINK}
-
-Once payment is confirmed we will set up your bot within 24 hours. Your WhatsApp will be live and running before you know it.
-
-Want to speak with someone first? Reply 4 to book a call.`;
-        } else if (text === '4' || lower.includes('call') || lower.includes('speak') || lower.includes('talk') || lower.includes('book')) {
-          reply = `Sure ${name}! Book a call with us at a time that works for you:
-
-${CALENDLY_LINK}
-
-Pick any available slot and we will walk you through everything personally.`;
-        } else if (lower.includes('yes') || lower.includes('get started')) {
+        } else if (text === '3' || lower.includes('ready') || lower.includes('start') || lower.includes('yes') || lower.includes('get started')) {
           reply = r.getStarted(name);
         } else {
           reply = r.default(name);
@@ -454,4 +440,4 @@ app.get('/inbox/payments/:clientId', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Dioverse bot running on port ${PORT}`));
-  
+      
