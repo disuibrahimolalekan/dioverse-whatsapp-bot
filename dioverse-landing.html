@@ -3,524 +3,694 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dioverse | WhatsApp Bot Setup</title>
+<title>Dioverse | WhatsApp Bot Setup for Nigerian Businesses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --green: #25D366;
-    --green-dim: rgba(37,211,102,0.12);
-    --green-border: rgba(37,211,102,0.25);
+    --green-dim: rgba(37,211,102,0.1);
+    --green-border: rgba(37,211,102,0.22);
     --black: #0a0a0a;
     --card: #111111;
-    --border: rgba(255,255,255,0.08);
+    --card2: #161616;
+    --border: rgba(255,255,255,0.07);
     --text: #f0ede8;
     --text-sec: #aaa;
+    --text-dim: #999;
     --accent: #FFE135;
   }
-
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { font-size: 16px; }
-
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size:16px; scroll-behavior:smooth; }
   body {
-    background: var(--black);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
+    background:var(--black); color:var(--text);
+    font-family:'Inter',-apple-system,sans-serif;
+    min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
   }
-
   body::before {
-    content: '';
-    position: fixed;
-    top: -200px;
-    left: -100px;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(37,211,102,0.07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+    content:''; position:fixed; top:-200px; left:-100px;
+    width:600px; height:600px; border-radius:50%;
+    background:radial-gradient(circle,rgba(37,211,102,0.06) 0%,transparent 70%);
+    pointer-events:none; z-index:0;
   }
+  .wrap { max-width:480px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
 
-  .wrap {
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── TABLET: centered card ── */
-  @media (min-width: 600px) and (max-width: 999px) {
-    body { display: flex; justify-content: center; padding: 40px 24px; }
-    .wrap {
-      width: 100%;
-      max-width: 500px;
-      background: #0f0f0f;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 24px;
-      padding: 0 36px 32px;
-    }
-    nav { padding-top: 32px; }
-  }
-
-  /* ── DESKTOP: two column ── */
-  @media (min-width: 1000px) {
-    body { display: flex; justify-content: center; align-items: flex-start; padding: 60px 40px; min-height: 100vh; }
-    .wrap {
-      width: 100%;
-      max-width: 1000px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto 1fr;
-      gap: 0 60px;
-      padding: 0;
-      background: none;
-    }
-    nav {
-      grid-column: 1 / -1;
-      padding: 0 0 40px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      margin-bottom: 48px;
-    }
-    .hero {
-      grid-column: 1;
-      animation: none;
-      opacity: 1;
-    }
-    .section {
-      grid-column: 2;
-      margin-top: 0;
-      padding-top: 0;
-      border-top: none;
-      animation: none;
-      opacity: 1;
-    }
-    .section + .section {
-      grid-column: 2;
-      margin-top: 40px;
-    }
-    footer {
-      grid-column: 1 / -1;
-    }
-  }
-
-  /* ── NAV ── */
+  /* NAV */
   nav {
-    padding: 24px 0 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding:20px 20px; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; background:rgba(10,10,10,0.92);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    z-index:100; margin:0 -20px;
   }
-
-  .logo {
-    font-size: clamp(1rem, 4vw, 1.2rem);
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    color: var(--text);
-  }
-  .logo span { color: var(--green); }
-
+  .logo { font-size:clamp(1rem,4vw,1.15rem); font-weight:800; letter-spacing:-0.3px; }
+  .logo span { color:var(--green); }
+  .nav-right { display:flex; align-items:center; gap:8px; }
   .nav-pill {
-    background: var(--green-dim);
-    border: 1px solid var(--green-border);
-    color: var(--green);
-    font-size: clamp(0.62rem, 2.5vw, 0.7rem);
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 100px;
-    letter-spacing: 0.3px;
+    background:var(--green-dim); border:1px solid var(--green-border);
+    color:var(--green); font-size:0.62rem; font-weight:600;
+    padding:4px 10px; border-radius:100px;
   }
+  .nav-cta {
+    background:var(--green); color:#000; font-size:0.7rem; font-weight:700;
+    padding:7px 14px; border-radius:8px; text-decoration:none; transition:background 0.2s;
+  }
+  .nav-cta:active { background:#1db954; }
 
-  /* ── HERO ── */
-  .hero { padding: clamp(36px, 8vw, 52px) 0 0; }
-
+  /* HERO */
+  .hero { padding:clamp(32px,8vw,48px) 0 0; }
   .live-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,225,53,0.08);
-    border: 1px solid rgba(255,225,53,0.2);
-    color: var(--accent);
-    font-size: clamp(0.65rem, 2.5vw, 0.72rem);
-    font-weight: 500;
-    padding: 5px 12px;
-    border-radius: 100px;
-    margin-bottom: clamp(16px, 4vw, 22px);
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,225,53,0.08); border:1px solid rgba(255,225,53,0.2);
+    color:var(--accent); font-size:clamp(0.62rem,2.5vw,0.7rem); font-weight:500;
+    padding:5px 12px; border-radius:100px; margin-bottom:clamp(14px,4vw,20px);
   }
-  .live-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 1.5s ease infinite;
-    flex-shrink: 0;
-  }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+  .live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.5s ease infinite; flex-shrink:0; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  h1 { font-size:clamp(1.5rem,6.5vw,2rem); font-weight:800; line-height:1.15; letter-spacing:-0.5px; margin-bottom:clamp(12px,3vw,16px); }
+  h1 em { font-style:normal; color:var(--green); }
+  .sub { font-size:clamp(0.85rem,3.5vw,0.95rem); color:#bbb; line-height:1.65; margin-bottom:clamp(24px,5vw,32px); }
 
-  h1 {
-    font-size: clamp(1.45rem, 6.5vw, 1.9rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.4px;
-    margin-bottom: clamp(14px, 3vw, 18px);
-    color: var(--text);
-  }
-  h1 em { font-style: normal; color: var(--green); }
+  /* STATS */
+  .stats { display:flex; background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:clamp(22px,5vw,32px); overflow:hidden; }
+  .stat { flex:1; padding:14px 8px; text-align:center; border-right:1px solid var(--border); }
+  .stat:last-child { border-right:none; }
+  .stat-num { font-size:clamp(1rem,4vw,1.2rem); font-weight:800; color:var(--green); line-height:1; margin-bottom:4px; }
+  .stat-label { font-size:clamp(0.58rem,2vw,0.63rem); color:var(--text-dim); line-height:1.3; }
 
-  .sub {
-    font-size: clamp(0.85rem, 3.5vw, 0.95rem);
-    color: #bbb;
-    line-height: 1.65;
-    font-weight: 400;
-    margin-bottom: clamp(28px, 6vw, 40px);
-  }
+  /* PROOF */
+  .proof { display:flex; align-items:center; gap:12px; margin-bottom:clamp(20px,4vw,28px); }
+  .avatars { display:flex; }
+  .av { width:30px; height:30px; border-radius:50%; border:2px solid var(--black); margin-left:-8px; display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; color:white; }
+  .av:first-child { margin-left:0; background:#128C7E; }
+  .av:nth-child(2) { background:#075E54; }
+  .av:nth-child(3) { background:#25D366; color:#000; }
+  .proof-text { font-size:clamp(0.7rem,3vw,0.78rem); color:#bbb; line-height:1.4; }
+  .proof-text strong { color:var(--text); font-weight:600; }
+  .divider { height:1px; background:var(--border); margin:clamp(20px,5vw,28px) 0; }
 
-  /* ── SOCIAL PROOF ── */
-  .proof {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: clamp(28px, 6vw, 40px);
+  /* FORM */
+  .form-head { font-size:clamp(0.92rem,4vw,1rem); font-weight:700; margin-bottom:4px; }
+  .form-sub { font-size:clamp(0.72rem,3vw,0.8rem); color:var(--text-sec); margin-bottom:clamp(16px,4vw,22px); }
+  .fields { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .field { position:relative; }
+  .field-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:rgba(136,136,136,0.5); pointer-events:none; display:flex; align-items:center; }
+  .field-icon svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  input[type="text"],input[type="email"],input[type="tel"] {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.09);
+    border-radius:10px; padding:14px 14px 14px 40px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:clamp(0.85rem,3.5vw,0.92rem);
+    outline:none; transition:border-color 0.2s,background 0.2s; -webkit-appearance:none;
   }
-  .avatars { display: flex; }
-  .av {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    border: 2px solid var(--black);
-    margin-left: -8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.55rem; font-weight: 700; color: white;
-  }
-  .av:first-child { margin-left: 0; background: #128C7E; }
-  .av:nth-child(2) { background: #075E54; }
-  .av:nth-child(3) { background: #25D366; color: #000; }
-  .proof-text { font-size: clamp(0.7rem, 3vw, 0.78rem); color: #bbb; line-height: 1.4; }
-  .proof-text strong { color: var(--text); font-weight: 600; }
-
-  /* ── DIVIDER ── */
-  .divider { height: 1px; background: var(--border); margin-bottom: clamp(28px, 6vw, 40px); }
-
-  /* ── FORM ── */
-  .form-head {
-    font-size: clamp(0.95rem, 4vw, 1.05rem);
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--text);
-  }
-  .form-sub {
-    font-size: clamp(0.75rem, 3vw, 0.82rem);
-    color: var(--text-sec);
-    margin-bottom: clamp(20px, 4vw, 26px);
-  }
-
-  .fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-
-  .field { position: relative; }
-  .field-icon {
-    position: absolute;
-    left: 14px; top: 50%;
-    transform: translateY(-50%);
-    color: rgba(136,136,136,0.5);
-    pointer-events: none;
-    display: flex; align-items: center;
-  }
-  .field-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-  input[type="text"], input[type="email"] {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 10px;
-    padding: 14px 14px 14px 40px;
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(0.85rem, 3.5vw, 0.92rem);
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    -webkit-appearance: none;
-  }
-  input::placeholder { color: rgba(136,136,136,0.4); }
-  input:focus { border-color: rgba(37,211,102,0.4); background: rgba(37,211,102,0.03); }
-  input.ok { border-color: rgba(37,211,102,0.3); }
-
+  input::placeholder { color:rgba(136,136,136,0.4); }
+  input:focus { border-color:rgba(37,211,102,0.4); background:rgba(37,211,102,0.03); }
+  input.ok { border-color:rgba(37,211,102,0.3); }
   .cta-btn {
-    width: 100%;
-    background: var(--green);
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: clamp(14px, 4vw, 16px);
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(0.88rem, 3.5vw, 0.95rem);
-    font-weight: 700;
-    cursor: pointer;
+    width:100%; background:var(--green); color:#000; border:none; border-radius:10px;
+    padding:clamp(14px,4vw,16px); font-family:'Inter',sans-serif;
+    font-size:clamp(0.88rem,3.5vw,0.95rem); font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:all 0.2s; opacity:0.35; pointer-events:none;
+  }
+  .cta-btn.on { opacity:1; pointer-events:all; }
+  .cta-btn.on:active { transform:scale(0.98); }
+  .cta-btn svg,.pricing-cta svg,.demo-btn svg,.final-cta-btn svg { width:18px; height:18px; fill:currentColor; flex-shrink:0; }
+  .note { text-align:center; font-size:clamp(0.63rem,2.5vw,0.68rem); color:#888; margin-top:10px; line-height:1.5; }
+
+  /* SECTION */
+  .section { margin-top:clamp(40px,9vw,56px); }
+  .section-label { font-size:clamp(0.58rem,2.2vw,0.63rem); font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-bottom:clamp(14px,3vw,20px); }
+  .section-title { font-size:clamp(1.05rem,4.5vw,1.3rem); font-weight:800; margin-bottom:clamp(18px,4vw,26px); letter-spacing:-0.3px; }
+  .section-title em { font-style:normal; color:var(--green); }
+
+  /* DEMO */
+  .demo-section {
+    background:linear-gradient(135deg,rgba(37,211,102,0.08) 0%,rgba(37,211,102,0.03) 100%);
+    border:1px solid var(--green-border); border-radius:18px;
+    padding:clamp(22px,6vw,32px); margin:clamp(36px,8vw,52px) 0; text-align:center;
+  }
+  .demo-icon { font-size:2.2rem; margin-bottom:10px; color:var(--green); display:flex; align-items:center; justify-content:center; width:52px; height:52px; background:var(--green-dim); border:1px solid var(--green-border); border-radius:14px; margin:0 auto 14px; }
+  .demo-title { font-size:clamp(0.98rem,4vw,1.15rem); font-weight:800; margin-bottom:8px; }
+  .demo-title em { font-style:normal; color:var(--green); }
+  .demo-sub { font-size:clamp(0.78rem,3vw,0.84rem); color:#bbb; margin-bottom:18px; line-height:1.6; }
+  .demo-inner { max-width:280px; margin:0 auto; }
+  .demo-field { position:relative; margin-bottom:10px; }
+  .demo-field .field-icon { left:14px; }
+  .demo-input {
+    width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--green-border);
+    border-radius:10px; padding:13px 14px 13px 40px; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:0.88rem; outline:none; -webkit-appearance:none;
+    transition:border-color 0.2s;
+  }
+  .demo-input::placeholder { color:rgba(136,136,136,0.5); }
+  .demo-input:focus { border-color:rgba(37,211,102,0.6); }
+  .demo-btn {
+    width:100%; background:var(--green); color:#000; border:none; border-radius:10px;
+    padding:13px; font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:all 0.2s; opacity:0.4; pointer-events:none;
+  }
+  .demo-btn.on { opacity:1; pointer-events:all; }
+  .demo-btn.on:active { transform:scale(0.97); }
+  .demo-note { font-size:0.62rem; color:var(--text-dim); margin-top:10px; }
+
+  /* STEPS */
+  .steps { display:flex; flex-direction:column; }
+  .step { display:flex; gap:14px; align-items:flex-start; padding:18px 0; border-bottom:1px solid var(--border); }
+  .step:last-child { border-bottom:none; }
+  .step-num { width:34px; height:34px; border-radius:50%; background:var(--green-dim); border:1px solid var(--green-border); color:var(--green); font-weight:800; font-size:0.82rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-title { font-size:clamp(0.82rem,3.2vw,0.9rem); font-weight:700; margin-bottom:3px; }
+  .step-desc { font-size:clamp(0.73rem,2.8vw,0.78rem); color:var(--text-sec); line-height:1.55; }
+
+  /* FEATURES */
+  .feats { display:flex; flex-direction:column; gap:14px; }
+  .feat { display:flex; align-items:flex-start; gap:12px; }
+  .feat-icon { width:36px; height:36px; flex-shrink:0; border-radius:9px; background:var(--green-dim); border:1px solid var(--green-border); display:flex; align-items:center; justify-content:center; font-size:0.9rem; color:var(--green); }
+  .feat-title { font-size:clamp(0.8rem,3.2vw,0.86rem); font-weight:600; margin-bottom:3px; }
+  .feat-desc { font-size:clamp(0.7rem,2.8vw,0.76rem); color:var(--text-sec); line-height:1.5; }
+
+  /* INDUSTRIES */
+  .industries { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .industry { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:13px; display:flex; align-items:center; gap:10px; transition:border-color 0.2s; }
+  .industry-icon { font-size:1.15rem; color:var(--green); display:flex; align-items:center; }
+  .industry-name { font-size:clamp(0.73rem,3vw,0.8rem); font-weight:600; }
+  .industry-desc { font-size:clamp(0.6rem,2.2vw,0.65rem); color:var(--text-dim); margin-top:1px; }
+
+  /* PRICING */
+  .pricing-card { background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; }
+  .pricing-top { background:linear-gradient(135deg,rgba(37,211,102,0.1) 0%,rgba(37,211,102,0.04) 100%); border-bottom:1px solid var(--border); padding:clamp(20px,5vw,28px); }
+  .pricing-badge { display:inline-block; background:var(--green-dim); border:1px solid var(--green-border); color:var(--green); font-size:0.6rem; font-weight:600; padding:3px 10px; border-radius:100px; margin-bottom:12px; letter-spacing:0.5px; text-transform:uppercase; }
+  .pricing-name { font-size:0.8rem; font-weight:600; color:var(--text-sec); margin-bottom:6px; }
+  .pricing-amount { font-size:clamp(1.8rem,7vw,2.2rem); font-weight:800; letter-spacing:-1px; line-height:1; }
+  .pricing-amount span { font-size:1rem; font-weight:500; color:var(--text-sec); }
+  .pricing-desc { font-size:0.73rem; color:#bbb; margin-top:6px; font-weight:500; }
+  .pricing-items { padding:clamp(18px,5vw,26px); }
+  .pricing-item { display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:clamp(0.76rem,3vw,0.82rem); }
+  .pricing-item:last-child { border-bottom:none; }
+  .check { color:var(--green); font-size:0.82rem; flex-shrink:0; margin-top:1px; }
+  .pricing-cta { width:100%; background:var(--green); color:#000; border:none; border-radius:10px; padding:15px; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:700; cursor:pointer; margin-top:18px; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; }
+  .pricing-cta:active { transform:scale(0.98); }
+  .guarantee { text-align:center; margin-top:12px; font-size:clamp(0.63rem,2.5vw,0.68rem); color:#aaa; }
+
+  /* TESTIMONIALS */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:clamp(16px,4vw,20px); margin-bottom:12px; }
+  .card-text { font-size:clamp(0.78rem,3.2vw,0.85rem); line-height:1.65; color:#ccc; margin-bottom:14px; }
+  .card-author { display:flex; align-items:center; gap:10px; }
+  .card-av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; color:white; flex-shrink:0; }
+  .card-name { font-size:clamp(0.73rem,3vw,0.78rem); font-weight:600; }
+  .card-biz { font-size:clamp(0.6rem,2.5vw,0.65rem); color:var(--text-dim); }
+  .stars { margin-left:auto; color:var(--accent); font-size:clamp(0.63rem,2.5vw,0.7rem); letter-spacing:1px; }
+
+  /* REFERRAL */
+  .referral-card { background:var(--card2); border:1px solid var(--border); border-radius:16px; padding:clamp(18px,5vw,26px); display:flex; gap:14px; align-items:flex-start; }
+  .referral-icon { width:44px; height:44px; border-radius:12px; background:rgba(255,225,53,0.1); border:1px solid rgba(255,225,53,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+  .referral-title { font-size:clamp(0.85rem,3.5vw,0.92rem); font-weight:700; margin-bottom:4px; }
+  .referral-desc { font-size:clamp(0.7rem,2.8vw,0.76rem); color:var(--text-sec); line-height:1.55; }
+
+  /* FAQ */
+  .faq { display:flex; flex-direction:column; }
+  .faq-item { border-bottom:1px solid var(--border); }
+  .faq-q { width:100%; background:none; border:none; color:var(--text); font-family:'Inter',sans-serif; font-size:clamp(0.8rem,3.2vw,0.86rem); font-weight:600; padding:16px 0; text-align:left; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .faq-arrow { color:var(--green); font-size:0.9rem; flex-shrink:0; transition:transform 0.25s; }
+  .faq-item.open .faq-arrow { transform:rotate(180deg); }
+  .faq-a { font-size:clamp(0.73rem,2.8vw,0.78rem); color:var(--text-sec); line-height:1.65; padding-bottom:16px; display:none; }
+  .faq-item.open .faq-a { display:block; }
+
+  /* FINAL CTA */
+  .final-cta { background:linear-gradient(135deg,rgba(37,211,102,0.1) 0%,rgba(37,211,102,0.04) 100%); border:1px solid var(--green-border); border-radius:20px; padding:clamp(26px,7vw,40px) clamp(20px,5vw,32px); text-align:center; margin:clamp(40px,9vw,56px) 0; }
+  .final-cta h2 { font-size:clamp(1.05rem,4.5vw,1.3rem); font-weight:800; margin-bottom:10px; letter-spacing:-0.3px; }
+  .final-cta h2 em { font-style:normal; color:var(--green); }
+  .final-cta p { font-size:clamp(0.76rem,3vw,0.84rem); color:#bbb; margin-bottom:22px; line-height:1.6; }
+  .final-cta-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:var(--green); color:#000; border:none; border-radius:10px; padding:15px 32px; font-family:'Inter',sans-serif; font-size:0.92rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .final-cta-btn:active { transform:scale(0.98); }
+
+  /* FOOTER */
+  footer { padding:clamp(22px,6vw,32px) 0 clamp(36px,8vw,48px); border-top:1px solid var(--border); text-align:center; }
+  footer p { font-size:clamp(0.63rem,2.5vw,0.7rem); color:rgba(136,136,136,0.4); }
+  footer span { color:var(--green); }
+
+  /* TABLET */
+  @media (min-width:600px) and (max-width:999px) {
+    body { display:flex; justify-content:center; padding:40px 24px; }
+    .wrap { width:100%; max-width:520px; background:#0f0f0f; border:1px solid rgba(255,255,255,0.07); border-radius:24px; padding:0 36px 32px; }
+    nav { margin:0 -36px; padding-left:36px; padding-right:36px; border-radius:24px 24px 0 0; }
+  }
+
+  /* DESKTOP */
+  @media (min-width:1000px) {
+    body { padding:0 40px; }
+    .wrap { max-width:1060px; }
+    nav { max-width:1060px; margin:0 auto; padding-left:0; padding-right:0; }
+    .page-body { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; padding-top:8px; }
+    .col-right { position:sticky; top:80px; }
+    .final-cta { margin-top:0; }
+  }
+
+  @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .hero { animation:up 0.5s ease forwards; }
+
+  /* BOTTOM STICKY NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 300;
+    background: rgba(10,10,10,0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 20px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
     display: flex;
+    gap: 10px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+  }
+  .bottom-nav-demo {
+    flex: 1; max-width: 200px;
+    background: transparent;
+    border: 1.5px solid var(--green-border);
+    color: var(--green);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
     transition: all 0.2s;
-    opacity: 0.35;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .bottom-nav-demo:active { background: var(--green-dim); }
+  .bottom-nav-start {
+    flex: 1; max-width: 200px;
+    background: var(--green);
+    border: none;
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .bottom-nav-start:active { transform: scale(0.97); background: #1db954; }
+
+  /* Push page content up so it doesn't hide behind bottom nav */
+  body { padding-bottom: 80px; }
+
+  @media (min-width: 600px) {
+    .bottom-nav { padding-left: 40px; padding-right: 40px; }
+    .bottom-nav-demo, .bottom-nav-start { max-width: 220px; }
+  }
+
+  /* TOAST POPUP */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1a2e1a;
+    border: 1px solid rgba(37,211,102,0.4);
+    color: var(--green);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s ease;
     pointer-events: none;
+       white-space: nowrap;
+    z-index: 199;
+    display: flex; align-items: center; gap: 8px;
   }
-  .cta-btn.on { opacity: 1; pointer-events: all; }
-  .cta-btn.on:active { transform: scale(0.98); background: #1fb855; }
-  .cta-btn svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-
-  .note {
-    text-align: center;
-    font-size: clamp(0.65rem, 2.5vw, 0.7rem);
-    color: #888;
-    margin-top: 12px;
-    line-height: 1.5;
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
-
-  /* ── FEATURES ── */
-  .section {
-    margin-top: clamp(44px, 10vw, 60px);
-    padding-top: clamp(32px, 7vw, 44px);
-    border-top: 1px solid var(--border);
-  }
-  .section-label {
-    font-size: clamp(0.6rem, 2.5vw, 0.65rem);
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-sec);
-    margin-bottom: clamp(18px, 4vw, 24px);
-  }
-  .feats { display: flex; flex-direction: column; gap: 14px; margin-bottom: clamp(32px, 7vw, 48px); }
-  .feat { display: flex; align-items: flex-start; gap: 12px; }
-  .feat-icon {
-    width: 34px; height: 34px; flex-shrink: 0;
-    border-radius: 9px;
-    background: var(--green-dim);
-    border: 1px solid var(--green-border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem;
-  }
-  .feat-title {
-    font-size: clamp(0.82rem, 3.2vw, 0.88rem);
-    font-weight: 600;
-    margin-bottom: 3px;
-    color: var(--text);
-  }
-  .feat-desc {
-    font-size: clamp(0.72rem, 2.8vw, 0.78rem);
-    color: var(--text-sec);
-    line-height: 1.5;
-  }
-
-  /* ── TESTIMONIALS ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: clamp(16px, 4vw, 20px);
-    margin-bottom: 12px;
-  }
-  .card-text {
-    font-size: clamp(0.8rem, 3.2vw, 0.87rem);
-    line-height: 1.65;
-    color: #ccc;
-    margin-bottom: 14px;
-    font-weight: 400;
-  }
-  .card-author { display: flex; align-items: center; gap: 10px; }
-  .card-av {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.62rem; font-weight: 700; color: white; flex-shrink: 0;
-  }
-  .card-name { font-size: clamp(0.75rem, 3vw, 0.8rem); font-weight: 600; color: var(--text); }
-  .card-biz { font-size: clamp(0.65rem, 2.5vw, 0.7rem); color: var(--text-sec); }
-  .stars { margin-left: auto; color: var(--accent); font-size: clamp(0.65rem, 2.5vw, 0.72rem); letter-spacing: 1px; }
-
-  /* ── FOOTER ── */
-  footer {
-    padding: clamp(24px, 6vw, 36px) 0 clamp(36px, 8vw, 52px);
-    border-top: 1px solid var(--border);
-    text-align: center;
-    margin-top: clamp(32px, 7vw, 44px);
-  }
-  footer p { font-size: clamp(0.68rem, 2.5vw, 0.74rem); color: rgba(136,136,136,0.4); }
-  footer span { color: var(--green); }
-
-  @keyframes up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-  .hero { animation: up 0.5s ease forwards; }
-  .section { animation: up 0.5s ease 0.1s both; }
 </style>
 </head>
 <body>
-
 <div class="wrap">
 
   <nav>
     <div class="logo">Dio<span>verse</span></div>
-    <div class="nav-pill">WhatsApp Bot</div>
+    <div class="nav-right">
+      <div class="nav-pill">WhatsApp Bot</div>
+    </div>
   </nav>
 
-  <section class="hero">
-    <div class="live-tag"><span class="live-dot"></span> Limited spots available</div>
+  <div class="page-body">
+  <div class="col-left">
 
-    <h1>Let <em>WhatsApp</em> handle your customer replies</h1>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="live-tag"><span class="live-dot"></span> Limited spots available</div>
+      <h1>Let <em>WhatsApp</em> handle your customer replies</h1>
+      <p class="sub">We set up a bot on your WhatsApp that greets every customer by their name, answers their questions and saves their contact automatically. You do nothing.</p>
 
-    <p class="sub">Enter your name and email. We will reach out on WhatsApp and show you exactly how it works, live.</p>
-
-    <div class="proof">
-      <div class="avatars">
-        <div class="av">AK</div>
-        <div class="av">TM</div>
-        <div class="av">OB</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Leads saved</div></div>
+        <div class="stat"><div class="stat-num">12+</div><div class="stat-label">Businesses live</div></div>
+        <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Always online</div></div>
       </div>
-      <div class="proof-text"><strong>12+ businesses</strong> already saving time<br>with Dioverse this month</div>
+
+      <div class="proof">
+        <div class="avatars">
+          <div class="av">AK</div><div class="av">TM</div><div class="av">OB</div>
+        </div>
+        <div class="proof-text"><strong>12+ businesses</strong> already saving time with Dioverse this month</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="get-started">
+        <p class="form-head">Get started in 10 seconds</p>
+        <p class="form-sub">Just your name and email. That is it.</p>
+        <div class="fields">
+          <div class="field">
+            <span class="field-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+            <input type="text" id="nameInput" placeholder="Your first name" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <span class="field-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 7 10-7"/></svg></span>
+            <input type="email" id="emailInput" placeholder="Your email address" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <span class="field-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+            <input type="tel" id="phoneInput" placeholder="Your WhatsApp number" autocomplete="off"/>
+          </div>
+        </div>
+        <button class="cta-btn" id="ctaBtn" onclick="openWhatsApp()">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Send My Details on WhatsApp
+        </button>
+        <p class="note">Every customer contact saved automatically. Zero leads lost.</p>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+      <p class="section-label">How it works</p>
+      <p class="section-title">Up and running in <em>24 hours</em></p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div><div class="step-title">You send us your details</div><div class="step-desc">Just your name, business name and what your business does. Takes 5 minutes.</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div><div class="step-title">We build and connect your bot</div><div class="step-desc">We write the replies, connect everything to your WhatsApp number and test it. You do not touch anything.</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div><div class="step-title">Your WhatsApp starts working for you</div><div class="step-desc">Every customer gets an instant personal reply. Their contact gets saved automatically. You get a private inbox to monitor and jump in anytime.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO IT'S FOR -->
+    <section class="section">
+      <p class="section-label">Who it is for</p>
+      <p class="section-title">Works for <em>any business</em> in Nigeria</p>
+      <div class="industries">
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg></div><div><div class="industry-name">Fashion</div><div class="industry-desc">Boutiques & designers</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg></div><div><div class="industry-name">Food & Catering</div><div class="industry-desc">Restaurants & chefs</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="industry-name">Real Estate</div><div class="industry-desc">Agents & property</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div><div class="industry-name">Beauty & Spa</div><div class="industry-desc">Salons & skincare</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div><div class="industry-name">Coaching</div><div class="industry-desc">Tutors & consultants</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div><div class="industry-name">E-commerce</div><div class="industry-desc">Online sellers & stores</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><div class="industry-name">Healthcare</div><div class="industry-desc">Clinics & pharmacies</div></div></div>
+        <div class="industry"><div class="industry-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div><div class="industry-name">Schools</div><div class="industry-desc">Academies & training</div></div></div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="section">
+      <p class="section-label">What people are saying</p>
+      <div class="card">
+        <p class="card-text">"Before this, I was replying customers manually at midnight. Now my WhatsApp handles everything on its own. My customers think I am always available."</p>
+        <div class="card-author"><div class="card-av" style="background:#128C7E;">AK</div><div><div class="card-name">Amaka K.</div><div class="card-biz">Online Fashion Store</div></div><div class="stars">★★★★★</div></div>
+      </div>
+      <div class="card">
+        <p class="card-text">"I run a catering business. The bot replies to pricing questions and saves all my customer details. I just focus on cooking now."</p>
+        <div class="card-author"><div class="card-av" style="background:#075E54;">TM</div><div><div class="card-name">Temi M.</div><div class="card-biz">Catering Business</div></div><div class="stars">★★★★★</div></div>
+      </div>
+      <div class="card">
+        <p class="card-text">"My clients message me and the bot greets them by name, explains my services and tells them my prices. It looks so professional."</p>
+        <div class="card-author"><div class="card-av" style="background:#25D366;color:#000;">OB</div><div><div class="card-name">Obiora B.</div><div class="card-biz">Business Coach</div></div><div class="stars">★★★★★</div></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <p class="section-label">Common questions</p>
+      <div class="faq">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Will my WhatsApp number get banned? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">No. We use the official Meta WhatsApp Business API. This is the same system WhatsApp itself approves for businesses. Your number is completely safe.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Do I need a new number or can I use my existing one? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">You need a dedicated number for the bot. It does not have to be a new SIM but it cannot be used on regular WhatsApp at the same time. We will guide you through this during setup.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">How long does setup take? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">Your bot will be live within 24 hours of payment. We handle the entire setup from building the replies to connecting your number. You just wait.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Can I change the bot replies later? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">Yes. Any time you want to update pricing, add new information or change how the bot responds, just tell us and we update it for you. That is what the monthly fee covers.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What if a customer asks something the bot cannot answer? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">You get a private inbox where you can see all conversations in real time. You can jump in and reply manually whenever you want. The bot handles the common questions, you handle the special ones.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">What does the ₦25,000/month cover? <span class="faq-arrow">▾</span></button>
+          <div class="faq-a">Your bot stays running, updated and fully supported. Any changes you want to the replies, any issues that come up, ongoing maintenance — we handle everything. You pay and forget about it.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REFERRAL -->
+    <section class="section">
+      <p class="section-label">Earn with Dioverse</p>
+      <div class="referral-card">
+        <div class="referral-icon" style="color:var(--accent)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div>
+          <div class="referral-title">Know a business that needs this?</div>
+          <div class="referral-desc">For every business you refer that successfully purchases the service, you earn ₦3,000. No limit on how many you can refer.</div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- col-left -->
+
+  <div class="col-right">
+
+    <!-- DEMO -->
+    <div class="demo-section" id="demo-box">
+      <div class="demo-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></div>
+      <div class="demo-title">See it reply you <em>right now</em></div>
+      <p class="demo-sub">Enter your name. Our bot will greet you on WhatsApp instantly. This is exactly what your customers will experience.</p>
+      <div class="demo-inner">
+        <div class="demo-field">
+          <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+          <input type="text" class="demo-input" id="demoName" placeholder="Enter your first name" autocomplete="off"/>
+        </div>
+        <div class="demo-field">
+          <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <input type="tel" class="demo-input" id="demoPhone" placeholder="Your WhatsApp number" autocomplete="off"/>
+        </div>
+        <div class="demo-field">
+          <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 7 10-7"/></svg></span>
+          <input type="email" class="demo-input" id="demoEmail" placeholder="Your email address" autocomplete="off"/>
+        </div>
+        <button class="demo-btn" id="demoBtn" onclick="startDemo()">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Experience the bot now
+        </button>
+        <div class="demo-note">WhatsApp opens. The bot greets you by name instantly.</div>
+      </div>
     </div>
 
-    <div class="divider"></div>
-
-    <p class="form-head">Get started in 10 seconds</p>
-    <p class="form-sub">Just your name and email. That is it.</p>
-
-    <div class="fields">
-      <div class="field">
-        <span class="field-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        </span>
-        <input type="text" id="nameInput" placeholder="Your first name" autocomplete="off" />
+    <!-- FEATURES -->
+    <section class="section">
+      <p class="section-label">What you get</p>
+      <div class="feats">
+        <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div><div class="feat-title">Instant automatic replies</div><div class="feat-desc">Your WhatsApp replies the moment someone messages you. Day or night.</div></div></div>
+        <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div><div class="feat-title">Greets every customer by name</div><div class="feat-desc">Every customer gets a personal reply using their actual name. Feels human, not robotic.</div></div></div>
+        <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></div><div><div class="feat-title">Saves every lead automatically</div><div class="feat-desc">Every customer who messages you gets saved. You never lose a lead again.</div></div></div>
+        <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m8 10 4 4 4-4"/></svg></div><div><div class="feat-title">Private inbox for you</div><div class="feat-desc">Watch every conversation and jump in to reply manually whenever you want.</div></div></div>
+        <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div><div class="feat-title">Works on any website</div><div class="feat-desc">Already have a website? We connect everything in minutes. No stress.</div></div></div>
+               <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div><div class="feat-title">We handle everything</div><div class="feat-desc">We build it, we maintain it, we fix it. You never touch any settings.</div></div></div>
       </div>
-      <div class="field">
-        <span class="field-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 7 10-7"/></svg>
-        </span>
-        <input type="email" id="emailInput" placeholder="Your email address" autocomplete="off" />
-      </div>
-    </div>
+    </section>
 
-    <button class="cta-btn" id="ctaBtn" onclick="openWhatsApp()">
+    <!-- PRICING -->
+    <section class="section">
+      <p class="section-label">Pricing</p>
+      <p class="section-title">Simple. <em>Transparent.</em> No surprises.</p>
+      <div class="pricing-card">
+        <div class="pricing-top">
+          <div class="pricing-badge">Done For You</div>
+          <div class="pricing-name">One-time Setup Fee</div>
+          <div class="pricing-amount">₦60,000 <span>setup</span></div>
+          <div class="pricing-desc">Then ₦25,000/month to keep it running</div>
+        </div>
+        <div class="pricing-items">
+          <div class="pricing-item"><span class="check">✓</span> Full bot setup on your WhatsApp</div>
+          <div class="pricing-item"><span class="check">✓</span> Custom replies written for your business</div>
+          <div class="pricing-item"><span class="check">✓</span> Greets every customer by their name</div>
+          <div class="pricing-item"><span class="check">✓</span> Automatic lead saving to Google Sheets</div>
+          <div class="pricing-item"><span class="check">✓</span> Private inbox to monitor all chats</div>
+          <div class="pricing-item"><span class="check">✓</span> Connected to your website if you have one</div>
+          <div class="pricing-item"><span class="check">✓</span> Live within 24 hours of payment</div>
+          <div class="pricing-item"><span class="check">✓</span> Ongoing support and maintenance included</div>
+          <button class="pricing-cta" onclick="goTo('get-started')">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            I want this for my business
+          </button>
+          <p class="guarantee">Not satisfied after setup? We fix it until you are happy.</p>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- col-right -->
+  </div><!-- page-body -->
+
+  <!-- FINAL CTA -->
+  <div class="final-cta">
+    <h2>Your business should never miss a <em>customer</em> again</h2>
+    <p>While you are sleeping, in a meeting or just living your life — your WhatsApp is replying, saving leads and making your business look professional. Let us set it up for you.</p>
+    <button class="final-cta-btn" onclick="goTo('get-started')">
       <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-      See It Live on WhatsApp
+      Get my bot set up now
     </button>
-
-    <p class="note">Every customer contact saved automatically. Zero leads lost.</p>
-  </section>
-
-  <section class="section">
-    <p class="section-label">What you get</p>
-    <div class="feats">
-      <div class="feat">
-        <div class="feat-icon">⚡</div>
-        <div>
-          <div class="feat-title">Replies customers automatically</div>
-          <div class="feat-desc">Your WhatsApp replies on its own, day and night. You do not have to be online.</div>
-        </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🎯</div>
-        <div>
-          <div class="feat-title">Greets them by their name</div>
-          <div class="feat-desc">Every customer gets a personal reply with their name. Feels human, not robotic.</div>
-        </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">🌐</div>
-        <div>
-          <div class="feat-title">Works on any website</div>
-          <div class="feat-desc">Already have a website? We plug it in within minutes. No stress.</div>
-        </div>
-      </div>
-      <div class="feat">
-        <div class="feat-icon">📋</div>
-        <div>
-          <div class="feat-title">Saves every customer contact</div>
-          <div class="feat-desc">Everyone who messages you gets saved automatically. Never lose a lead again.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="margin-top:0; border-top:none; padding-top:0;">
-    <p class="section-label">What people are saying</p>
-
-    <div class="card">
-      <p class="card-text">"Before this, I was replying customers manually at midnight. Now my WhatsApp handles everything on its own. My customers think I am always available."</p>
-      <div class="card-author">
-        <div class="card-av" style="background:#128C7E;">AK</div>
-        <div><div class="card-name">Amaka K.</div><div class="card-biz">Online Fashion Store</div></div>
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <p class="card-text">"I run a catering business. The bot replies to pricing questions and saves all my customer details. I just focus on cooking now."</p>
-      <div class="card-author">
-        <div class="card-av" style="background:#075E54;">TM</div>
-        <div><div class="card-name">Temi M.</div><div class="card-biz">Catering Business</div></div>
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <p class="card-text">"My clients message me and the bot greets them by name, explains my services and tells them my prices. It looks so professional."</p>
-      <div class="card-author">
-        <div class="card-av" style="background:#25D366;color:#000;">OB</div>
-        <div><div class="card-name">Obiora B.</div><div class="card-biz">Business Coach</div></div>
-        <div class="stars">★★★★★</div>
-      </div>
-    </div>
-  </section>
+  </div>
 
   <footer>
     <p>Built with care by <span>Dioverse</span></p>
   </footer>
 
+  <!-- TOAST -->
+  <div class="toast" id="toast">✓ Details saved</div>
+
+  <!-- BOTTOM STICKY NAV -->
+  <div class="bottom-nav">
+    <button class="bottom-nav-demo" onclick="goTo('demo-box')">
+      Try Demo
+    </button>
+    <button class="bottom-nav-start" onclick="goTo('get-started')">
+      Get Started
+    </button>
+  </div>
+
 </div>
 
 <script>
+  const PHONE = '2347074315797';
   const nameInput = document.getElementById('nameInput');
   const emailInput = document.getElementById('emailInput');
+  const phoneInput = document.getElementById('phoneInput');
   const ctaBtn = document.getElementById('ctaBtn');
+  const demoName = document.getElementById('demoName');
+  const demoPhone = document.getElementById('demoPhone');
+  const demoEmail = document.getElementById('demoEmail');
+  const demoBtn = document.getElementById('demoBtn');
 
+  // Form validation — Get Started
   function check() {
     const n = nameInput.value.trim();
     const e = emailInput.value.trim();
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    const p = phoneInput.value.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
     nameInput.classList.toggle('ok', n.length > 1);
-    emailInput.classList.toggle('ok', valid);
-    ctaBtn.classList.toggle('on', n.length > 1 && valid);
+    emailInput.classList.toggle('ok', emailValid);
+    phoneInput.classList.toggle('ok', p.length > 7);
+    ctaBtn.classList.toggle('on', n.length > 1 && emailValid && p.length > 7);
   }
-
   nameInput.addEventListener('input', check);
   emailInput.addEventListener('input', check);
+  phoneInput.addEventListener('input', check);
+
+  // Demo validation
+  function checkDemo() {
+    const n = demoName.value.trim();
+    const p = demoPhone.value.trim();
+    const e = demoEmail.value.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+    demoBtn.classList.toggle('on', n.length > 1 && p.length > 7 && emailValid);
+  }
+  demoName.addEventListener('input', checkDemo);
+  demoPhone.addEventListener('input', checkDemo);
+  demoEmail.addEventListener('input', checkDemo);
+
+  // Toast popup
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = '✓ ' + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
 
   async function openWhatsApp() {
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
 
-    // Google Sheets — background, no wait
-    fetch('https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec', {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ name, email })
+    // Show toast immediately
+    showToast('Details saved');
+
+    // Save to backend (non-blocking)
+    fetch('https://dioverse-whatsapp-bot.onrender.com/save-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone })
     }).catch(() => {});
 
-    // Save to MongoDB first — wait for this
-    try {
-      await fetch('https://dioverse-whatsapp-bot.onrender.com/save-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email })
-      });
-    } catch (e) {}
+    // Open WhatsApp after short delay so toast is visible
+    setTimeout(() => {
+      const msg = `Hi, my name is ${name}. I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
+      window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+    }, 1000);
+  }
 
-    const phone = '2347074315797';
-    const msg = `Hi, my name is ${name}. I just came across Dioverse and I would love to know more about the WhatsApp bot service. Can you tell me more?`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  async function startDemo() {
+    const name = demoName.value.trim();
+    const phone = demoPhone.value.trim();
+    const email = demoEmail.value.trim();
+
+    // Show toast
+    showToast('Details saved');
+
+    // Save demo lead to backend
+    fetch('https://dioverse-whatsapp-bot.onrender.com/save-demo-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone })
+    }).catch(() => {});
+
+    // Open WhatsApp after short delay
+        setTimeout(() => {
+      const msg = `Hi, my name is ${name}. I want to see the Dioverse bot demo.`;
+      window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+    }, 1000);
+  }
+
+  function openPricingWhatsApp() {
+    const msg = `Hi, I just saw the pricing on your website. I am interested in getting the WhatsApp bot set up for my business. Can we talk?`;
+    window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  function goTo(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const navHeight = document.querySelector('nav').offsetHeight + 16;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  function toggleFaq(btn) {
+    btn.parentElement.classList.toggle('open');
   }
 </script>
-
 </body>
-  </html>
-  
+</html>
