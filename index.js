@@ -16,7 +16,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const SYSTEME_API_KEY = process.env.SYSTEME_API_KEY;
 const PAYSTACK_PAYMENT_LINK = 'https://paystack.shop/pay/dioverse-bot-setup';
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwp3YfQ5nphWnlbJzmDzPOPKNoOs29u0NWw3hcAroucIXMGwI9seIJpfO1OjIjstzOf5A/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyX5g06twrdJbOUxvpJfnCpE-HVeD3OlOqwi45sq71-JxWNeGK93emSaYdvwsexRSYLvA/exec';
 
 let CALENDLY_LINK = process.env.CALENDLY_LINK || 'https://calendly.com/dioverse';
 
