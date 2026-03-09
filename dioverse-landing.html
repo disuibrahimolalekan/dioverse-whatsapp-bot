@@ -640,10 +640,10 @@
     showToast('Details saved');
 
     // Save to backend (non-blocking)
-    fetch('https://dioverse-whatsapp-bot.onrender.com/save-lead', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone })
+    fetch('https://script.google.com/macros/s/AKfycbyX5g06twrdJbOUxvpJfnCpE-HVeD3OlOqwi45sq71-JxWNeGK93emSaYdvwsexRSYLvA/exec', {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ name, email, phone, type: 'lead' })
     }).catch(() => {});
 
     // Open WhatsApp after short delay so toast is visible
@@ -662,10 +662,10 @@
     showToast('Details saved');
 
     // Save demo lead to backend
-    fetch('https://dioverse-whatsapp-bot.onrender.com/save-demo-lead', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone })
+    fetch('https://script.google.com/macros/s/AKfycbyX5g06twrdJbOUxvpJfnCpE-HVeD3OlOqwi45sq71-JxWNeGK93emSaYdvwsexRSYLvA/exec', {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ name, email, phone, type: 'demo' })
     }).catch(() => {});
 
     // Open WhatsApp after short delay
