@@ -67,7 +67,7 @@ Reply 3 to get started`,
 
 Book a quick call and we will walk you through everything and get your bot live within 24 hours:
 
-https://calendly.com/dioversetech/whatsbot
+https://cal.com/dioversetech/bot-setup
 
 See you on the call!`,
 
